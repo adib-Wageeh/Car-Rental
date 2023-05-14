@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_impl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../models/entities/user_entity.dart';
 
 part 'app_event.dart';
 part 'app_state.dart';
@@ -14,22 +13,24 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       : _authenticationRepository = authenticationRepository,
         super(
         authenticationRepository.currentUser.isNotEmpty
-            ? AppState.authenticated(authenticationRepository.currentUser)
+            ? (FirebaseAuth.instance.currentUser!.emailVerified)?const AppState.authenticated():const AppState.authenticatedUnVerifiedEmail()
             : const AppState.unauthenticated(),
       ) {
     on<_AppUserChanged>(_onUserChanged);
     on<AppLogoutRequested>(_onLogoutRequested);
-    _userSubscription = _authenticationRepository.user.listen(
-          (user) => add(_AppUserChanged(user)),
+    userSubscription = _authenticationRepository.user.listen(
+          (user) {
+            add(_AppUserChanged(user));
+            },
     );
   }
 
   final AuthenticationRepositoryImplementation _authenticationRepository;
-  late final StreamSubscription<UserEntity> _userSubscription;
+  late final StreamSubscription<User?> userSubscription;
 
   void _onUserChanged(_AppUserChanged event, Emitter<AppState> emit) async{
 
-    if(event.user.isEmpty){
+    if(event.user == null){
     final result = await checkOnBoarding(emit);
     if(result == 1){
       emit(const AppState.firstUnauthenticated());
@@ -37,7 +38,12 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       emit(const AppState.unauthenticated());
     }
     }else{
-      emit(AppState.authenticated(event.user));
+      if(event.user!.emailVerified) {
+        emit(const AppState.authenticated());
+      }else{
+        emit(const AppState.authenticatedUnVerifiedEmail());
+      }
+
     }
 
   }
@@ -59,9 +65,10 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     unawaited(_authenticationRepository.logOut());
   }
 
+
   @override
   Future<void> close() {
-    _userSubscription.cancel();
+    userSubscription.cancel();
     return super.close();
   }
 }

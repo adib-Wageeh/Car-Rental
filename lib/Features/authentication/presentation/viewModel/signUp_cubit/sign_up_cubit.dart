@@ -1,20 +1,27 @@
-import 'dart:ui';
-import 'package:bloc/bloc.dart';
+import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_impl.dart';
+import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
 import 'package:rent_car/application/error/signUpFailure.dart';
 import '../../../models/entities/email_model.dart';
+import '../../../models/entities/name_model.dart';
 import '../../../models/entities/password_model.dart';
 import '../../../models/entities/re_password_model.dart';
+import '../../../models/repository/image_picker.dart';
 
 part 'sign_up_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
-  SignUpCubit({required this.authenticationRepository}) :
-        super(const SignUpState(rePassword: RePassword.pure(password: "")));
+  SignUpCubit({required this.authenticationRepository,
+  required this.imagePickerRepo,
+  }) :
+        super(const SignUpState(rePassword: RePassword.pure(password: ""),
+      name: NameModel.pure()
+      ));
 
   final AuthenticationRepositoryImplementation authenticationRepository;
+  final RepositoryImagePicker imagePickerRepo;
 
   void emailChanged(String value) {
     final email = Email.dirty(value);
@@ -22,9 +29,20 @@ class SignUpCubit extends Cubit<SignUpState> {
       state.copyWith(
           email: email,
           formState: FormzSubmissionStatus.initial,
-          status: Formz.validate([email,state.rePassword,state.password]) ),
+          status: Formz.validate([email,state.rePassword,state.password,state.name]) ),
     );
   }
+
+  void nameChanged(String value) {
+    final name = NameModel.dirty(value);
+    emit(
+      state.copyWith(
+          name: name,
+          formState: FormzSubmissionStatus.initial,
+          status: Formz.validate([name,state.email,state.rePassword,state.password]) ),
+    );
+  }
+
 
   void passwordChanged(String value) {
     final password = Password.dirty(value);
@@ -33,7 +51,7 @@ class SignUpCubit extends Cubit<SignUpState> {
       state.copyWith(
         password: password,
         formState: FormzSubmissionStatus.initial,
-        status: Formz.validate([state.email,state.rePassword, password]),
+        status: Formz.validate([state.email,state.rePassword,state.name, password]),
       ),
     );
   }
@@ -44,10 +62,29 @@ class SignUpCubit extends Cubit<SignUpState> {
       state.copyWith(
         rePassword: password,
         formState: FormzSubmissionStatus.initial,
-        status: Formz.validate([state.email,password, state.password]),
+        status: Formz.validate([state.email,password,state.name, state.password]),
       ),
     );
   }
+
+  Future<void> setImage(Uint8List image)async{
+
+     emit(state.copyWith(
+       imagePath: image,
+       formState: FormzSubmissionStatus.initial,
+     ));
+  }
+
+
+  Future<Uint8List?> getImage()async{
+
+    final res = await imagePickerRepo.pickImageFunction();
+    if(res != null){
+      return res;
+    }
+    return null;
+  }
+
 
   void obscureChange(){
     SignUpState appState = state.copyWith(isObscure: !(state.isObscure),
@@ -63,13 +100,19 @@ class SignUpCubit extends Cubit<SignUpState> {
   }
 
   Future<void> signUpWithCredentials() async {
-    if (!state.status) return;
+    if (state.imagePath== null){
+      emit(state.copyWith(errorMessage: "please select an image",formState: FormzSubmissionStatus.failure));
+      return;
+    }
     emit(state.copyWith(formState: FormzSubmissionStatus.inProgress));
     try {
       await authenticationRepository.signUp(
         email: state.email.value,
         password: state.password.value,
+        name: state.name.value,
+        imagePath: state.imagePath!
       );
+      await sendVerificationCode();
       emit(state.copyWith(formState: FormzSubmissionStatus.success));
     } on SignUpWithEmailAndPasswordFailure catch (e) {
       emit(
@@ -81,6 +124,15 @@ class SignUpCubit extends Cubit<SignUpState> {
     } catch (_) {
       emit(state.copyWith(formState: FormzSubmissionStatus.failure));
     }
+  }
+
+  void clearState(){
+    emit(const SignUpState(name: NameModel.pure(), rePassword: RePassword.pure(password: "")));
+  }
+
+  Future<void> sendVerificationCode()async{
+
+   await authenticationRepository.sendEmailVerificationCode();
   }
 
 }

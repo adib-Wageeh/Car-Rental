@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "658707478640-c27c6dllnvohp8i4ps9oqft3bt5daq9d.apps.googleusercontent.com",
+          "client_id": "658707478640-p869q7keomb1lkjqf8ithdi6bg97joeh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rent_car",
+            "certificate_hash": "a62fc89911250edd14a26ab4b05b7a149d919870"
+          }
+        },
+        {
+          "client_id": "658707478640-0tp2mp4d26tgtskk6s9ns30eak70iofp.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,8 +35,15 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "658707478640-c27c6dllnvohp8i4ps9oqft3bt5daq9d.apps.googleusercontent.com",
+              "client_id": "658707478640-0tp2mp4d26tgtskk6s9ns30eak70iofp.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "658707478640-pvmkrpbm2l55lu1paheb4442oraipvkk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.rentCar"
+              }
             }
           ]
         }

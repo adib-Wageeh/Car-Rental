@@ -10,38 +10,42 @@ class SignUpState extends Equatable {
     this.email=const Email.pure(),
     this.password= const Password.pure(),
     this.errorMessage,
+    required this.name,
     required this.rePassword,
-    this.image,
+    this.imagePath,
     this.isObscure2=true
 });
 
   final Email email;
   final Password password;
   final RePassword rePassword;
+  final NameModel name;
   final bool status;
   final bool isObscure;
   final bool isObscure2;
   final String? errorMessage;
-  final Image? image;
+  final Uint8List? imagePath;
   final FormzSubmissionStatus formState;
 
   @override
   // TODO: implement props
-  List<Object?> get props => [isObscure2,email,password,rePassword,status,isObscure,errorMessage,image,formState];
+  List<Object?> get props => [name,isObscure2,email,password,rePassword,status,isObscure,errorMessage,imagePath,formState];
 
 
   SignUpState copyWith({
     Email? email,
+    NameModel? name,
     Password? password,
     bool? status,
     FormzSubmissionStatus? formState,
     String? errorMessage,
     bool? isObscure,
     RePassword? rePassword,
-    Image? image,
+    Uint8List? imagePath,
     bool? isObscure2
   }) {
     return SignUpState(
+      name: name??this.name,
       isObscure2: isObscure2??this.isObscure2,
       isObscure: isObscure ?? this.isObscure,
       email: email ?? this.email,
@@ -50,7 +54,7 @@ class SignUpState extends Equatable {
       formState: formState ?? this.formState,
       errorMessage: errorMessage ?? this.errorMessage,
       rePassword: rePassword?? this.rePassword,
-      image: image?? this.image
+      imagePath: imagePath?? this.imagePath
     );
   }
 

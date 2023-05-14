@@ -9,9 +9,10 @@ class RegisterButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SignUpCubit, SignUpState>(
-      buildWhen: (previous, current) => (previous.status != current.status || previous.formState != current.formState),
+      buildWhen: (previous, current) => (
+          previous.status != current.status || previous.formState != current.formState),
       builder: (context, state) {
-        return state.formState == FormzSubmissionStatus.inProgress
+        return state.formState.isInProgress
             ? const CircularProgressIndicator()
             : ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -21,7 +22,9 @@ class RegisterButtonWidget extends StatelessWidget {
             backgroundColor: Colors.blueAccent,
           ),
           onPressed: state.status
-              ? () => context.read<SignUpCubit>().signUpWithCredentials()
+              ? () {
+            context.read<SignUpCubit>().signUpWithCredentials();
+          }
               : null,
           child: const Text('SIGN UP',style: TextStyle(color: Colors.white)),
         );

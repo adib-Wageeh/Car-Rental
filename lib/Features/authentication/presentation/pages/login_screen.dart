@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_impl.dart';
+import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
+import 'package:rent_car/Features/authentication/models/repository/repository_fireStore.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/EmailLoginInputWidget.dart';
+import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/ForgetYourPasswordWidget.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/LoginButtonWidget.dart';
+import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/LoginIconsWidgets.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/SignUpButtonWidget.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/passwordLoginInputWidget.dart';
 import 'package:rent_car/main.dart';
@@ -18,7 +21,9 @@ class LoginProvider extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<LoginCubit>(create: (context)=>LoginCubit(getIt<AuthenticationRepositoryImplementation>()),
+    return BlocProvider<LoginCubit>(create: (context)=>LoginCubit(getIt<AuthenticationRepositoryImplementation>(),
+    getIt<FireStoreRepositoryImplementation>()
+    ),
       child: const Scaffold(
           body: LoginScreen()),);
   }
@@ -59,8 +64,19 @@ class LoginScreen extends StatelessWidget {
               const PasswordLoginInputWidget(),
               const SizedBox(height: 8),
               const LoginButtonWidget(),
+              const ForgetYourPasswordWidget(),
               const SizedBox(height: 4),
               const SignUpButtonWidget(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AuthenticationBottomIcons(image: Assets.loginFacebookIcon,onTab: (){}),
+                  const SizedBox(width: 18,),
+                  AuthenticationBottomIcons(image: Assets.loginGoogleIcon,onTab: (){
+                    context.read<LoginCubit>().logInWithGoogle();
+                  }, )
+                ],
+              )
             ],
           ),
         ),

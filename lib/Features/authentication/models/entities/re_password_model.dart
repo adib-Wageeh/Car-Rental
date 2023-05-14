@@ -15,9 +15,8 @@ class RePassword extends FormzInput<String, PasswordValidationError> {
 
   @override
   PasswordValidationError? validator(String? value) {
-    print("val  "+value!);
-    print(password);
-    return  (value.isNotEmpty && value == password)
+
+    return  (value!.isNotEmpty && value == password)
         ? null
         : PasswordValidationError.invalid;
   }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_impl.dart';
-import 'package:rent_car/Features/authentication/presentation/viewModel/logOut_cubit/log_out_cubit.dart';
+import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
+import 'package:rent_car/Features/authentication/models/repository/repository_fireStore.dart';
+import 'package:rent_car/Features/authentication/presentation/viewModel/signUp_cubit/sign_up_cubit.dart';
+import '../../Features/authentication/models/repository/image_picker.dart';
 import '../../Features/authentication/presentation/pages/splash_screen.dart';
 import '../../Features/authentication/presentation/viewModel/appBloc/app_bloc.dart';
 import '../../main.dart';
@@ -11,20 +13,28 @@ class BasicApp extends StatelessWidget {
   const BasicApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
+    return MultiRepositoryProvider(
+  providers: [
+    RepositoryProvider.value(
       value: (context) => getIt<AuthenticationRepositoryImplementation>(),
-      child: MultiBlocProvider(
+),
+    RepositoryProvider.value(
+      value: (context) => getIt<FireStoreRepositoryImplementation>(),
+    ),
+  ],
+  child: MultiBlocProvider(
         providers: [
           BlocProvider<AppBloc>(create: (_) => AppBloc(
         authenticationRepository: getIt<AuthenticationRepositoryImplementation>(),
     ),),
-          BlocProvider<LogOutCubit>(create: (_) => LogOutCubit(
-            getIt<AuthenticationRepositoryImplementation>(),
+          BlocProvider<SignUpCubit>(create: (_) => SignUpCubit(
+            authenticationRepository: getIt<AuthenticationRepositoryImplementation>(),
+              imagePickerRepo: getIt<RepositoryImagePicker>()
           ),),
         ],
         child: const BlocListen()
       ),
-    );
+);
   }
 }
 
@@ -36,7 +46,6 @@ class BlocListen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AppBloc,AppState>(
   listener: (context, state) {
-
     if(context.read<AppBloc>().state.status == AppStatus.firstUnauthenticated){
       _navigatorKey.currentState
           ?.pushNamedAndRemoveUntil(Routes.onBoarding, (r) => false);
@@ -46,6 +55,9 @@ class BlocListen extends StatelessWidget {
     }else if(context.read<AppBloc>().state.status == AppStatus.authenticated){
       _navigatorKey.currentState
           ?.pushNamedAndRemoveUntil(Routes.home, (r) => false);
+    }else if(context.read<AppBloc>().state.status == AppStatus.authenticatedUnVerifiedEmail){
+      _navigatorKey.currentState
+          ?.pushNamedAndRemoveUntil(Routes.unVerified, (r) => false);
     }
   },
   child: MaterialApp(
