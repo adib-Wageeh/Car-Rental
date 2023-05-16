@@ -26,7 +26,6 @@ dependencies:
   shared_preferences: ^2.1.0
   font_awesome_flutter: ^10.4.0
   google_sign_in: ^6.1.0
-  flutter_facebook_auth: ^5.0.11
   flutter_onboarding_slider: ^1.0.9
   path: ^1.8.2
   image_picker: ^0.8.7+4
@@ -37,6 +36,9 @@ dependencies:
   image_cropper: ^3.0.3
   cropperx: ^1.1.1
   flutter_image_compress: ^2.0.3
+  flutter_easyloading: ^3.0.5
+  sizer: ^2.0.15
+  shimmer: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +60,7 @@ flutter:
       - assets/login/facebook.png
       - assets/login/google.png
       - assets/user.png
+      - assets/onBoarding/car_rent.png
 
   #   - images/a_dot_ham.jpeg
 

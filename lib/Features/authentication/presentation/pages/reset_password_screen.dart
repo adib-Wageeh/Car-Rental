@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/reset_password/EmailInputButtonWidget.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/reset_password/EmailResetInputWidget.dart';
-
 import '../../../../main.dart';
+import '../../../../models/repository/repository_auth.dart';
 import '../viewModel/reset_cubit/reset_cubit.dart';
 
 class ResetPasswordProvider extends StatelessWidget {

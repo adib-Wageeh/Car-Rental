@@ -2,13 +2,15 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
 import 'package:rent_car/application/error/signUpFailure.dart';
-import '../../../models/entities/email_model.dart';
-import '../../../models/entities/name_model.dart';
-import '../../../models/entities/password_model.dart';
-import '../../../models/entities/re_password_model.dart';
-import '../../../models/repository/image_picker.dart';
+
+import '../../../../../models/entities/signUp/email_model.dart';
+import '../../../../../models/entities/signUp/name_model.dart';
+import '../../../../../models/entities/signUp/password_model.dart';
+import '../../../../../models/entities/signUp/re_password_model.dart';
+import '../../../../../models/repository/image_picker.dart';
+import '../../../../../models/repository/repository_auth.dart';
+
 
 part 'sign_up_state.dart';
 

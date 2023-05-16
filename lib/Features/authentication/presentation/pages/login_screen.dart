@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_fireStore.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/EmailLoginInputWidget.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/ForgetYourPasswordWidget.dart';
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/LoginButtonWidget.dart';
@@ -11,6 +9,8 @@ import 'package:rent_car/Features/authentication/presentation/pages/widgets/logi
 import 'package:rent_car/Features/authentication/presentation/pages/widgets/login/passwordLoginInputWidget.dart';
 import 'package:rent_car/main.dart';
 import '../../../../application/core/assets.dart';
+import '../../../../models/repository/repository_auth.dart';
+import '../../../../models/repository/repository_fireStore.dart';
 import '../viewModel/login_cubit/login_cubit.dart';
 
 class LoginProvider extends StatelessWidget {

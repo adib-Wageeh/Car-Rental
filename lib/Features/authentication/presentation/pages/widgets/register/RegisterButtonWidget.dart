@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import '../../../../../../application/core/assets.dart';
 import '../../../viewModel/signUp_cubit/sign_up_cubit.dart';
 
 class RegisterButtonWidget extends StatelessWidget {
@@ -19,7 +20,7 @@ class RegisterButtonWidget extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Assets.appPrimaryWhiteColor,
           ),
           onPressed: state.status
               ? () {

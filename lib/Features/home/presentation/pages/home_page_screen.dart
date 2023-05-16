@@ -1,11 +1,13 @@
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
 import 'package:rent_car/Features/authentication/presentation/viewModel/appBloc/app_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../../../../main.dart';
+import 'package:rent_car/Features/home/presentation/pages/widgets/AppBarHomeView.dart';
+import 'package:rent_car/Features/home/presentation/pages/widgets/app_drawer_widget.dart';
+import '../../../../application/core/assets.dart';
+import '../../../../application/core/routes.dart';
+import '../viewModel/app_bar/app_bar_cubit.dart';
+import '../viewModel/cars_bloc/cars_bloc.dart';
 
 class HomePageScreen extends StatelessWidget {
   const HomePageScreen({Key? key}) : super(key: key);
@@ -14,115 +16,32 @@ class HomePageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: SliderDrawer(
-            appBar: SliderAppBar(
-              appBarColor: Colors.white,
-              title: const Text("Rent Me", style: TextStyle(fontSize: 24)),
-              trailing: IconButton(
-                  onPressed: () {}, icon: const Icon(Icons.settings)),
-            ),
-            sliderOpenSize: 190,
-            slider: _SliderView(
-              onItemClick: (title) {
-                switch (title) {
-                  case "LogOut":
-                    context.read<AppBloc>().add(const AppLogoutRequested());
-                    break;
-                }
-              },
-            ),
-            child: const HomeBody()),
+        appBar: AppBar(
+          backgroundColor: Assets.appPrimaryWhiteColor,
+          foregroundColor: Colors.white
+          ,
+          actions: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.settings))
+          ],
+          title: const Text("Rent Me"),
+        ),
+        drawer: SliderView(onItemClick: (item) {
+          switch (item) {
+            case "LogOut":
+              context.read<AppBloc>().add(const AppLogoutRequested());
+              break;
+            case "Edit Profile":
+              Navigator.push(context,
+                  Routes.routes(const RouteSettings(name: Routes.editAccount)));
+              break;
+          }
+        }),
+        body: const HomeBody(),
       ),
     );
   }
 }
 
-class Menu {
-  final IconData iconData;
-  final String title;
-
-  Menu(this.iconData, this.title);
-}
-
-class _SliderView extends StatelessWidget {
-  final Function(String)? onItemClick;
-
-  const _SliderView({Key? key, this.onItemClick}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.only(top: 30),
-      child: ListView(
-        children: <Widget>[
-          const SizedBox(
-            height: 30,
-          ),
-          CachedNetworkImage(
-            width: 130,
-            height: 130,
-            placeholder: (context, url) => const CircularProgressIndicator(),
-            imageUrl: getIt<AuthenticationRepositoryImplementation>().currentUser.photo!,
-              imageBuilder: (context, imageProvider) { // you can access to imageProvider
-                return CircleAvatar( // or any widget that use imageProvider like (PhotoView)
-                  backgroundImage: imageProvider,
-                );
-              },
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            getIt<AuthenticationRepositoryImplementation>().currentUser.name!,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          ...[
-            Menu(Icons.edit, 'Edit Profile'),
-            Menu(Icons.delete, 'Delete Account'),
-            Menu(Icons.arrow_back_ios, 'LogOut')
-          ]
-              .map((menu) =>
-              _SliderMenuItem(
-                  title: menu.title,
-                  iconData: menu.iconData,
-                  onTap: onItemClick))
-              .toList(),
-        ],
-      ),
-    );
-  }
-}
-
-class _SliderMenuItem extends StatelessWidget {
-  final String title;
-  final IconData iconData;
-  final Function(String)? onTap;
-
-  const _SliderMenuItem({Key? key,
-    required this.title,
-    required this.iconData,
-    required this.onTap})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-        title: Text(title,
-            style: const TextStyle(
-                color: Colors.black, fontFamily: 'BalsamiqSans_Regular')),
-        leading: Icon(iconData, color: Colors.black),
-        onTap: () => onTap?.call(title));
-  }
-}
 
 class HomeBody extends StatelessWidget {
   const HomeBody({
@@ -132,30 +51,96 @@ class HomeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: DotNavigationBar(
-        margin: const EdgeInsets.only(left: 10, right: 10),
-        currentIndex: 0,
-        dotIndicatorColor: Colors.white,
-        unselectedItemColor: Colors.grey[300],
-        enableFloatingNavBar: false,
-        selectedItemColor: Colors.blueAccent,
-        onTap: (index) {},
-        items: [
-          DotNavigationBarItem(
-            icon: const Icon(Icons.home),
-          ),
-          DotNavigationBarItem(
-            icon: const Icon(Icons.search),
-          ),
-          DotNavigationBarItem(
-            icon: const Icon(Icons.chat),
-          ),
-          DotNavigationBarItem(
-            icon: const Icon(Icons.person),
-          ),
-        ],
+      body: BlocBuilder<AppBarCubit, AppBarState>(
+        builder: (context, state) {
+          if (state is AppBarHome || state is AppBarInitial) {
+            BlocProvider.of<CarsBloc>(context).add(GetData());
+            return const AppBarHomeView();
+          } else if (state is AppBarOffers) {
+            // BlocProvider.of<GetReportCubit>(context).switchTransactionState(true);
+            return const AppBarOffersView();
+          } else if (state is AppBarNotifications) {
+            return const AppBarNotificationsView();
+          }
+          // BlocProvider.of<GetTransactionsPerDayCubit>(context).getTransactionsPerDay(BlocProvider.of<GetTransactionsPerDayCubit>(context).selectedDay);
+          return const AppBarChatsView();
+        },
       ),
-      body: const Text(""),
+      bottomNavigationBar: BlocBuilder<AppBarCubit, AppBarState>(
+        builder: (context, state) {
+          return DotNavigationBar(
+            margin: const EdgeInsets.only(left: 16, right: 16),
+            currentIndex: context
+                .read<AppBarCubit>()
+                .currIndex,
+            dotIndicatorColor: Colors.transparent,
+            unselectedItemColor: Colors.grey[300],
+            enableFloatingNavBar: false,
+            enablePaddingAnimation: false,
+            selectedItemColor: Assets.appPrimaryWhiteColor,
+            onTap: (int i) {
+              if(i == BlocProvider.of<AppBarCubit>(context).currIndex)return;
+              final cubit = BlocProvider.of<AppBarCubit>(context);
+              switch (i) {
+                case 0:
+                  cubit.setHomeView();
+                  break;
+                case 1:
+                  cubit.setNotificationsView();
+                  break;
+                case 2:
+                  cubit.setChatsView();
+                  break;
+                case 3:
+                  cubit.setOffersView();
+                  break;
+              }
+            },
+            items: [
+              DotNavigationBarItem(
+                icon: const Icon(Icons.home, size: 32),
+              ),
+              DotNavigationBarItem(
+                icon: const Icon(Icons.notifications_active, size: 32),
+              ),
+              DotNavigationBarItem(
+                icon: const Icon(Icons.chat, size: 32),
+              ),
+              DotNavigationBarItem(
+                icon: const Icon(Icons.local_offer_rounded, size: 32),
+              ),
+            ],
+          );
+        },
+      ),
     );
+  }
+}
+
+
+class AppBarOffersView extends StatelessWidget {
+  const AppBarOffersView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+class AppBarNotificationsView extends StatelessWidget {
+  const AppBarNotificationsView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+class AppBarChatsView extends StatelessWidget {
+  const AppBarChatsView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }

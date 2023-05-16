@@ -1,9 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rent_car/application/error/resetPasswordFailure.dart';
-import '../../../models/entities/email_model.dart';
 import 'package:formz/formz.dart';
-import '../../../models/repository/repository_auth.dart';
+
+import '../../../../../models/entities/signUp/email_model.dart';
+import '../../../../../models/repository/repository_auth.dart';
 
 part 'reset_state.dart';
 

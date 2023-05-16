@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'application/app/base_app.dart';
 import 'application/injection_container.dart';
 import 'firebase_options.dart';
+import 'package:sizer/sizer.dart';
 
 final getIt = GetIt.instance;
 

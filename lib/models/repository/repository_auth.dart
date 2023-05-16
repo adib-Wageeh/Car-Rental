@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_fireStore.dart';
+import 'package:rent_car/models/repository/repository_fireStore.dart';
 import '../../../../application/app/cache.dart';
 import '../../../../application/error/resetPasswordFailure.dart';
 import '../../../../application/error/signInFailure.dart';
@@ -18,11 +18,11 @@ class AuthenticationRepositoryImplementation{
     CacheClient? cache,
     firebase_auth.FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
-  })  : _cache = cache ?? CacheClient(),
+  })  : cache = cache ?? CacheClient(),
         _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
   _googleSignIn = googleSignIn ?? GoogleSignIn.standard();
 
-  final CacheClient _cache;
+  final CacheClient cache;
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
   bool isSignUp = false;
@@ -41,7 +41,7 @@ class AuthenticationRepositoryImplementation{
       }
       if(isSignUp == false) {
         user = await firebaseUser.toUser;
-        _cache.write<UserEntity>(key: userCacheKey, value: user);
+        cache.write<UserEntity>(key: userCacheKey, value: user);
       }
 
       return firebaseUser;
@@ -51,9 +51,12 @@ class AuthenticationRepositoryImplementation{
   /// Returns the current cached user.
   /// Defaults to [UserEntity.empty] if there is no cached user.
   UserEntity get currentUser {
-    return _cache.read<UserEntity>(key: userCacheKey) ?? UserEntity.empty;
+    return cache.read<UserEntity>(key: userCacheKey) ?? UserEntity.empty;
   }
 
+  void cacheChange(UserEntity user){
+    cache.write(key: userCacheKey, value: user);
+  }
 
   /// Creates a new user with the provided [email] and [password].
   ///
@@ -70,8 +73,8 @@ class AuthenticationRepositoryImplementation{
          final imagePathCloud = await getIt<FireStoreRepositoryImplementation>().addNewUserData(
         _firebaseAuth.currentUser!.uid,
         name, email, imagePath);
-         UserEntity userEntity = UserEntity(id: _firebaseAuth.currentUser!.uid, email: email, name: name, photo: imagePathCloud);
-         _cache.write(key: userCacheKey, value: userEntity);
+         UserEntity userEntity = UserEntity(cars: [],id: _firebaseAuth.currentUser!.uid, email: email, name: name, photo: imagePathCloud);
+         cache.write(key: userCacheKey, value: userEntity);
         }
       });
       isSignUp = false;
@@ -101,9 +104,6 @@ class AuthenticationRepositoryImplementation{
         email: email,
         password: password,
       );
-      // final user = await getIt<FireStoreRepositoryImplementation>().getUser(_firebaseAuth.currentUser!.uid);
-      // _cache.write(key: userCacheKey, value: user);
-
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw LogInWithEmailAndPasswordFailure.fromCode(e.code);
     } catch (_) {
@@ -124,6 +124,12 @@ class AuthenticationRepositoryImplementation{
           idToken: googleAuth.idToken,
         );
       await _firebaseAuth.signInWithCredential(credential);
+      await getIt<FireStoreRepositoryImplementation>().addNewUserDataGoogleSignIn(
+        _firebaseAuth.currentUser!.uid,
+        _firebaseAuth.currentUser!.displayName!,
+        _firebaseAuth.currentUser!.email!,
+        _firebaseAuth.currentUser!.photoURL!,
+      );
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw LogInWithGoogleFailure.fromCode(e.code);
     }
@@ -132,7 +138,12 @@ class AuthenticationRepositoryImplementation{
   Future<void> resetPassword({required String email}) async {
     try {
 
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      List<String> methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(FirebaseAuth.instance.currentUser!.email!);
+      if(!methods.contains("google.com")) {
+        await _firebaseAuth.sendPasswordResetEmail(email: email);
+      }else{
+        throw(FirebaseAuthException(code: 'user-not-found'));
+      }
 
     } on FirebaseAuthException catch (e) {
       throw ResetPasswordFailure.fromCode(e.code);

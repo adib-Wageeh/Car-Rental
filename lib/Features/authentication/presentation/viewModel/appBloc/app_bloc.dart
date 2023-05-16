@@ -2,8 +2,9 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../../models/repository/repository_auth.dart';
 
 part 'app_event.dart';
 part 'app_state.dart';

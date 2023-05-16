@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 
+import '../../../../../../application/core/assets.dart';
 import '../../../viewModel/login_cubit/login_cubit.dart';
 
 class LoginButtonWidget extends StatelessWidget {
@@ -20,7 +21,7 @@ class LoginButtonWidget extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Assets.appPrimaryWhiteColor,
           ),
           onPressed: state.status
               ? () => context.read<LoginCubit>().logInWithCredentials()

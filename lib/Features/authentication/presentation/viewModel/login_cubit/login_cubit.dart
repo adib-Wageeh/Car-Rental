@@ -1,12 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
-import 'package:rent_car/Features/authentication/models/repository/repository_auth.dart';
 import '../../../../../application/error/signInFailure.dart';
 import '../../../../../application/error/signInWithGoogleFailure.dart';
-import '../../../models/entities/email_model.dart';
-import '../../../models/entities/password_model.dart';
-import '../../../models/repository/repository_fireStore.dart';
+import '../../../../../models/entities/signUp/email_model.dart';
+import '../../../../../models/entities/signUp/password_model.dart';
+import '../../../../../models/repository/repository_auth.dart';
+import '../../../../../models/repository/repository_fireStore.dart';
 
 part 'login_state.dart';
 
