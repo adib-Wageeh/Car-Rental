@@ -21,10 +21,7 @@ class GetUserDataCubit extends Cubit<GetUserDataState> {
   }
 
   dataChange(String? name,String? imagePath){
-    print(state.name);
-    print(imagePath);
     if(name == ""){
-      print("jjjjjj");
       emit(state.copyWith(imagePath: imagePath));
     }else if(imagePath == ""){
       emit(state.copyWith(name: name));
@@ -32,6 +29,8 @@ class GetUserDataCubit extends Cubit<GetUserDataState> {
     emit(state.copyWith(name: name,imagePath: imagePath));
 
   }
+
+
 
 
 }

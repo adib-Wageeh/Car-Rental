@@ -36,14 +36,10 @@ class AuthenticateEmailScreen extends StatelessWidget {
                 const SizedBox(height: 24,),
                 const Text("Enter the link to verify your email",style: TextStyle(fontSize: 16)),
                 const SizedBox(height: 12,),
-                Row(
-                  children: [
-                    const Text("Have You Pressed the Link?",style: TextStyle(fontSize: 16)),
-                    TextButton(onPressed: (){
-                      context.read<AppBloc>().add(const AppLogoutRequested());
-                    }, child: const Text("Login"))
-                  ],
-                ),
+                const Text("Have You Pressed the Link?",style: TextStyle(fontSize: 16)),
+                TextButton(onPressed: (){
+                  context.read<AppBloc>().add(const AppLogoutRequested());
+                }, child: const Text("Login")),
                 const Spacer(),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),

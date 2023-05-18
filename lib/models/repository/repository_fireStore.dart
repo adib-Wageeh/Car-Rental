@@ -24,7 +24,7 @@ class FireStoreRepositoryImplementation {
    final res = await firebaseStorage.ref().child("users/$id/image").putData(image);
    final String imagePath = await res.ref.getDownloadURL();
    await fireStore_instance.collection("users").doc(id).set({
-     "name":name,"email":email,"image":imagePath,"cars":[]
+     "name":name,"email":email,"image":imagePath
    });
    return imagePath;
  }
@@ -33,7 +33,7 @@ class FireStoreRepositoryImplementation {
     List<String> methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(FirebaseAuth.instance.currentUser!.email!);
     if(!methods.contains("password")) {
       await fireStore_instance.collection("users").doc(id).set({
-        "name": name, "email": email, "image": image,"cars":[]
+        "name": name, "email": email, "image": image
       });
     }
 
@@ -76,43 +76,81 @@ class FireStoreRepositoryImplementation {
 
  }
 
- Future<void> addCarOffer(String carName,String description,double price,List<Uint8List> images,String sellerId)async{
+ Future<void> addCarOffer(String carName,String description,double price,List<Uint8List?>? images,String location)async{
 
    List<String> imagesPath=[];
    int index=0;
-   for(Uint8List image in images) {
+
+   final docId = await fireStore_instance.collection("cars").add({
+     "carName": carName, "description": description,
+     "price": price.toString(),"images":imagesPath,"sellerUid":authenticationRepositoryImplementation.currentUser.id,
+     "addedDate":DateTime.now(),
+     "location":location
+   });
+   for(int x=0;x<images!.length;x++) {
      final res = await firebaseStorage.ref()
-         .child("cars/$sellerId/$index")
-         .putData(image);
+         .child("cars/${authenticationRepositoryImplementation.currentUser.id}/${docId.id}/$index")
+         .putData(images[x]!);
      final String imagePath = await res.ref.getDownloadURL();
      imagesPath.add(imagePath);
      index +=1;
    }
-   await fireStore_instance.collection("cars").doc().set({
-     "carName": carName, "description": description,
-     "price": price,"images":imagesPath,"sellerUid":sellerId
+
+   await fireStore_instance.collection("cars").doc(docId.id).update({
+    "images":imagesPath
    });
+
 
  }
 
+  Future<QuerySnapshot<Map<String, dynamic>>> getFirstCarsDocuments()async{
 
- Future<List<CarEntity>> getCars()async{
+    try {
+
+      final data = await fireStore_instance.collection("cars").
+      orderBy("addedDate",descending: true).limit(5).get();
+
+      return data;
+    }catch(e){
+     rethrow;
+    }
+  }
+
+
+ Future<List<CarEntity>> getFirstCars(QuerySnapshot<Map<String,dynamic>> data)async{
 
    List<CarEntity> cars =[];
    try {
-     final snapShot = await fireStore_instance.collection("cars").get();
-
-     for (var element in snapShot.docs) {
-       cars.add(CarEntity.fromJson(element.data()));
+     for (var element in data.docs) {
+       UserEntity userEntity = await getCarSeller(element.data()["sellerUid"]);
+       cars.add(CarEntity.fromJson(element.data(),element.id,userEntity));
      }
-
      return cars;
-
    }catch(e){
-     print(e);
      return cars;
    }
+ }
 
+  Future<QuerySnapshot<Map<String, dynamic>>> getNextCarsDocs(QuerySnapshot<Map<String,dynamic>> oldData)async{
+
+    try {
+      final data = await fireStore_instance.collection("cars").orderBy("addedDate",descending: true)
+          .startAfter([oldData.docs[oldData.size-1].data()["addedDate"]])
+          .limit(5).get();
+      return data;
+    }catch(e){
+      rethrow;
+    }
+  }
+
+ Future<UserEntity> getCarSeller(String sellerUid)async{
+
+   try {
+     final snapShot = await fireStore_instance.collection("users").doc(sellerUid).get();
+     return UserEntity.fromJson(snapShot.data()!,snapShot.id);
+   }catch(e){
+     return UserEntity.empty;
+   }
  }
  
  Future<void> saveNameChanges(String name)async{

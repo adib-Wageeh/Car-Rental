@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 enum ContentLineType {
   twoLines,
@@ -22,11 +23,18 @@ class ContentPlaceholder extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 96.0,
-            height: 72.0,
+            width: 110.sp,
+            height: 110.sp,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12.0),
               color: Colors.white,
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.grey,
+                  spreadRadius: 3,
+                  blurRadius: 3
+                )
+              ]
             ),
           ),
           const SizedBox(width: 12.0),

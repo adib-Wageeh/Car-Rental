@@ -7,7 +7,6 @@ import 'package:rent_car/Features/home/presentation/pages/widgets/app_drawer_wid
 import '../../../../application/core/assets.dart';
 import '../../../../application/core/routes.dart';
 import '../viewModel/app_bar/app_bar_cubit.dart';
-import '../viewModel/cars_bloc/cars_bloc.dart';
 
 class HomePageScreen extends StatelessWidget {
   const HomePageScreen({Key? key}) : super(key: key);
@@ -54,7 +53,6 @@ class HomeBody extends StatelessWidget {
       body: BlocBuilder<AppBarCubit, AppBarState>(
         builder: (context, state) {
           if (state is AppBarHome || state is AppBarInitial) {
-            BlocProvider.of<CarsBloc>(context).add(GetData());
             return const AppBarHomeView();
           } else if (state is AppBarOffers) {
             // BlocProvider.of<GetReportCubit>(context).switchTransactionState(true);
@@ -69,6 +67,8 @@ class HomeBody extends StatelessWidget {
       bottomNavigationBar: BlocBuilder<AppBarCubit, AppBarState>(
         builder: (context, state) {
           return DotNavigationBar(
+            itemPadding: const EdgeInsets.only(top: 0,bottom: 0),
+            paddingR: const EdgeInsets.only(top: 0,bottom: 0),
             margin: const EdgeInsets.only(left: 16, right: 16),
             currentIndex: context
                 .read<AppBarCubit>()

@@ -1,5 +1,8 @@
 library cache;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rent_car/models/entities/car_entity.dart';
+
 
 class CacheClient {
   CacheClient() : _cache = <String, Object>{};

@@ -18,7 +18,7 @@ class LoadingView extends StatelessWidget {
               children:
               List.generate(15, (index) {
                 return const ContentPlaceholder(
-                  lineType: ContentLineType.twoLines,
+                  lineType: ContentLineType.threeLines,
                 );
               })
 

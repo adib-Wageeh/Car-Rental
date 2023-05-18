@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:rent_car/Features/authentication/presentation/viewModel/signUp_cubit/sign_up_cubit.dart';
+import 'package:rent_car/Features/home/presentation/viewModel/addCar/add_car_cubit.dart';
 import 'package:rent_car/Features/home/presentation/viewModel/app_bar/app_bar_cubit.dart';
-import 'package:rent_car/Features/home/presentation/viewModel/cars_bloc/cars_bloc.dart';
+import 'package:rent_car/Features/home/presentation/viewModel/cars_bloc/get_cars_bloc.dart';
 import 'package:sizer/sizer.dart';
 import '../../Features/authentication/presentation/pages/splash_screen.dart';
 import '../../Features/authentication/presentation/viewModel/appBloc/app_bloc.dart';
+import '../../Features/home/presentation/viewModel/car_description/car_description_cubit.dart';
 import '../../Features/home/presentation/viewModel/getUserData/get_user_data_cubit.dart';
 import '../../main.dart';
 import '../../models/repository/image_picker.dart';
@@ -33,15 +34,22 @@ class BasicApp extends StatelessWidget {
           BlocProvider<AppBloc>(create: (_) => AppBloc(
         authenticationRepository: getIt<AuthenticationRepositoryImplementation>(),
     ),),
-          BlocProvider<CarsBloc>(create: (_)=> CarsBloc(fireStoreRepositoryImplementation: getIt<FireStoreRepositoryImplementation>())),
           BlocProvider<SignUpCubit>(create: (_) => SignUpCubit(
             authenticationRepository: getIt<AuthenticationRepositoryImplementation>(),
               imagePickerRepo: getIt<RepositoryImagePicker>()
           ),),
           BlocProvider<AppBarCubit>(create: (context)=>AppBarCubit()),
+          BlocProvider<AddCarCubit>(create: (context)=>AddCarCubit(
+    repositoryImagePicker: getIt<RepositoryImagePicker>()
+    ,fireStoreRepositoryImplementation: getIt<FireStoreRepositoryImplementation>())),
           BlocProvider<GetUserDataCubit>(create: (_) => GetUserDataCubit(
               authenticationRepositoryImplementation: getIt<AuthenticationRepositoryImplementation>(),
           )..setState(),),
+          BlocProvider<CarDescriptionCubit>(create: (_) => CarDescriptionCubit(
+            fireStoreRepositoryImplementation: getIt<FireStoreRepositoryImplementation>()),
+          ),
+          BlocProvider<GetCarsBloc>(create: (_) => GetCarsBloc()..add(GetFirstCarsEvent()),
+          ),
         ],
         child: const BlocListen()
       ),
@@ -76,6 +84,7 @@ class BlocListen extends StatelessWidget {
 
       return MaterialApp(
         navigatorKey: _navigatorKey,
+        builder: EasyLoading.init(),
         debugShowCheckedModeBanner: false,
         themeMode: ThemeMode.system,
         theme: ThemeData.from(
