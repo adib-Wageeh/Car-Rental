@@ -8,22 +8,22 @@ class CarEntity extends Equatable{
   final String? description;
   final String? pricePerDay;
   final List<dynamic>? images;
-  final String sellerUid;
   final String addedDate;
   final String location;
   final String id;
-  final UserEntity userEntity;
+  final DocumentReference userRef;
+  UserEntity? userEntity;
 
-  const CarEntity({
+  CarEntity({
+    this.userEntity,
     required this.location,
-    this.userEntity=UserEntity.empty,
+    required this.userRef,
     required this.addedDate,
     required this.carName,
     required this.id,
     required this.description,
     required this.images,
-    required this.pricePerDay,
-    required this.sellerUid
+    required this.pricePerDay
   });
 
   Map<String,dynamic> toJson(){
@@ -33,25 +33,24 @@ class CarEntity extends Equatable{
       "description":description,
       "pricePerDay":pricePerDay,
       "images":images,
-      "sellerUid":sellerUid,
       "addedDate":addedDate
     };
   }
 
-  factory CarEntity.fromJson(Map<String,dynamic> json,String id,UserEntity userEntity){
+  factory CarEntity.fromJson(DocumentSnapshot snapshot){
+    final data = snapshot.data() as Map<String,dynamic>;
     return CarEntity(
-    addedDate: fromTimeStampToTime(json["addedDate"]),
-    userEntity: userEntity,
-    id: id,
-    location: json["location"]
-    ,carName: json["carName"],description: json["description"],
-        images: json["images"],sellerUid: json["sellerUid"],pricePerDay: json["price"]);
+    addedDate: fromTimeStampToTime(data["addedDate"]),
+        userRef: data["userRef"],
+    id: snapshot.id,
+    location: data["location"]
+    ,carName: data["carName"],description: data["description"],
+        images: data["images"],pricePerDay: data["price"].toString());
   }
 
   static String fromTimeStampToTime(Timestamp timestamp) {
     final date = DateTime.now().difference(timestamp.toDate());
 
-    print(date);
     if (date.inDays > 365) {
       return "${date.inDays~/365} year";
     } else if (date.inDays > 30) {
@@ -67,9 +66,14 @@ class CarEntity extends Equatable{
     }
   }
 
+  Future<void> fetchUser() async {
+    DocumentSnapshot userSnapshot = await userRef.get();
+    userEntity = UserEntity.fromFireStore(userSnapshot);
+  }
+
   @override
   // TODO: implement props
-  List<Object?> get props => [id,carName,description,pricePerDay,images,sellerUid];
+  List<Object?> get props => [userRef,id,carName,description,pricePerDay,images];
 
 
 

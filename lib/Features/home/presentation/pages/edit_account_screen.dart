@@ -1,13 +1,12 @@
+import 'dart:io';
 import 'dart:typed_data';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rent_car/Features/home/presentation/viewModel/getUserData/get_user_data_cubit.dart';
-import 'package:rent_car/models/repository/repository_fireStore.dart';
 import '../../../../main.dart';
-import '../../../../models/repository/repository_auth.dart';
+import '../../../../models/repository/repository_fireStore.dart';
 import '../../../authentication/presentation/pages/Crop_image_screen.dart';
 import '../../../authentication/presentation/viewModel/signUp_cubit/sign_up_cubit.dart';
 import '../viewModel/editProfile/edit_profile_cubit.dart';
@@ -18,8 +17,7 @@ class EditAccountScreenProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<EditProfileCubit>(create: (context)=>EditProfileCubit(
-    getUserDataCubit: GetUserDataCubit(authenticationRepositoryImplementation: getIt<AuthenticationRepositoryImplementation>())
-    ,fireStoreRepositoryImplementation: getIt<FireStoreRepositoryImplementation>()),
+    fireStoreRepositoryImplementation: getIt<FireStoreRepositoryImplementation>()),
     child: const EditAccountScreen(),
     );
   }
@@ -29,6 +27,7 @@ class EditAccountScreenProvider extends StatelessWidget {
 
 class EditAccountScreen extends StatelessWidget {
   const EditAccountScreen({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +63,7 @@ class EditAccountScreen extends StatelessWidget {
                          ,decoration: InputDecoration(
                            labelText: "Name",
                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-                           hintText: context.read<GetUserDataCubit>().state.name
+                           hintText: context.read<UserCubit>().state.name
                          ),),
                        ],
                      ),
@@ -75,13 +74,14 @@ class EditAccountScreen extends StatelessWidget {
             child: SizedBox(
               width: 120,
               child: ElevatedButton(onPressed: ()async{
-                await context.read<EditProfileCubit>().saveData();
-                    context.read<GetUserDataCubit>().dataChange(context
-                        .read<EditProfileCubit>()
-                        .nameEditingController
-                        .text,
-                        context
-                            .read<EditProfileCubit>().imagePath);
+                final result = await context.read<EditProfileCubit>().saveData();
+                if(result == 1){
+                  await context.read<UserCubit>().updateUserInPrefs(
+                      context.read<EditProfileCubit>().nameEditingController.text,
+                      context.read<EditProfileCubit>().image
+                  );
+                }
+
               },style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent
               ), child: const Text("Save",style: TextStyle(color: Colors.white)),),
@@ -105,21 +105,26 @@ class ProfilePictureWidget extends StatelessWidget {
       builder: (context, state) {
         return Stack(
             children:[
-              (context.read<EditProfileCubit>().image ==null)?
-              CachedNetworkImage(
-              width: 150,
-              height: 150,
-              placeholder: (context, url) => const CircularProgressIndicator(),
-              imageUrl: context.read<GetUserDataCubit>().state.imagePath,
-              imageBuilder: (context, imageProvider) { // you can access to imageProvider
-                return CircleAvatar( // or any widget that use imageProvider like (PhotoView)
-                  backgroundImage: imageProvider,
-                );
-              },
-            ):
-                  ClipRRect(
-        borderRadius: BorderRadius.circular(84)
-        ,child: Image.memory(context.read<EditProfileCubit>().image!,width: 150,height: 150)),
+              (context.read<EditProfileCubit>().image==null)?
+              CircleAvatar(
+                radius: 80,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(64),
+                  child: Image.memory(
+                    File(context.read<UserCubit>().state.photo!).readAsBytesSync(),
+                  ),
+                ),
+              ):
+              CircleAvatar(
+                radius: 80,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(64),
+                  child: Image.memory(
+                    context.read<EditProfileCubit>().image!
+                  ),
+                ),
+              )
+              ,
               Positioned(
                   top: 0,
                   right: 0,

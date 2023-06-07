@@ -1,50 +1,70 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/material.dart';
 import 'package:rent_car/models/entities/car_entity.dart';
-
+import 'package:rent_car/models/repository/CarRepository.dart';
 import '../../../../../main.dart';
-import '../../../../../models/repository/repository_fireStore.dart';
 
 part 'get_cars_event.dart';
 part 'get_cars_state.dart';
 
 class GetCarsBloc extends Bloc<GetCarsEvent, GetCarsState> {
-  GetCarsBloc() :super(GetCarsInitial()) {
+  GetCarsBloc() : carRepository = CarRepository(),
+        super(GetCarsInitial()) {
     on<GetFirstCarsEvent>(fetchFirstList);
-    on<GetNextCarsEvent>(fetchNextMovies);
+    on<GetNextCarsEvent>(fetchNextCars);
   }
 
-  StreamController<List<CarEntity>> movieController = StreamController<List<CarEntity>>();
+  StreamController<List<CarEntity>> carsController = StreamController<List<CarEntity>>.broadcast();
+
+  CarRepository carRepository;
   List<CarEntity> carsList=[];
-  Stream<List<CarEntity>> get movieStream => movieController.stream;
+  Stream<List<CarEntity>> get carsStream => carsController.stream;
   late QuerySnapshot<Map<String, dynamic>> documentSnapShot;
+  bool isGettingNext = false;
+  bool isUp = false;
+  bool isDown = false;
 
 
   void fetchFirstList(GetFirstCarsEvent event,Emitter<GetCarsState> emit ) async {
     emit(GetCarsLoading());
-    QuerySnapshot<Map<String, dynamic>> document = await getIt<FireStoreRepositoryImplementation>().getFirstCarsDocuments();
-   carsList = await getIt<FireStoreRepositoryImplementation>().getFirstCars(document);
+    QuerySnapshot<Map<String, dynamic>> document;
+    if(isUp == true || isDown == true){
+      document = await getIt<CarRepository>().getSortedFirstCarsDocuments((isUp)?1:2);
+    }else{
+      document = await getIt<CarRepository>().getFirstCarsDocuments();
+    }
+   carsList = await getIt<CarRepository>().getFirstCars(document);
     documentSnapShot = document;
-    movieController.sink.add(carsList);
+    carsController.sink.add(carsList);
     emit(GetCarsLoaded());
   }
 
 /*This will automatically fetch the next 10 elements from the list*/
-  fetchNextMovies(GetNextCarsEvent event,Emitter<GetCarsState> emit) async {
-    // emit(GetNextCarsLoading());
-    QuerySnapshot<Map<String, dynamic>> document = await getIt<FireStoreRepositoryImplementation>().getNextCarsDocs(documentSnapShot);
-    List<CarEntity> newCarsList = await getIt<FireStoreRepositoryImplementation>().getFirstCars(document);
-    carsList.addAll(newCarsList);
-    documentSnapShot = document;
-    movieController.sink.add(carsList);
-    // emit(GetCarsLoaded());
+  fetchNextCars(GetNextCarsEvent event,Emitter<GetCarsState> emit) async {
+    if(isGettingNext)return;
+    isGettingNext = true;
+    QuerySnapshot<Map<String, dynamic>> document;
+    if(isUp == true || isDown == true) {
+      document = await getIt<CarRepository>().getNextSortedCarsDocs((isUp)?1:2,documentSnapShot);
+    }else{
+      document = await getIt<CarRepository>().getNextCarsDocs(documentSnapShot);
+    }
+      if(document.size == 0){
+       emit(GetCarsEnded());
+      }else {
+        List<CarEntity> newCarsList = await getIt<CarRepository>().getFirstCars(document);
+        carsList.addAll(newCarsList);
+        documentSnapShot = document;
+        carsController.sink.add(carsList);
+      }
+    isGettingNext = false;
   }
 
-  void dispose() {
-    movieController.close();
+
+  Future<void> dispose() async{
+   await carsController.close();
     // showIndicatorController.close();
   }
 

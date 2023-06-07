@@ -9,3 +9,5 @@ class GetCarsLoading extends GetCarsState {}
 
 
 class GetCarsLoaded extends GetCarsState {}
+
+class GetCarsEnded extends GetCarsState {}

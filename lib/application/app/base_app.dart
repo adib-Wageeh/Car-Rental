@@ -5,12 +5,14 @@ import 'package:rent_car/Features/authentication/presentation/viewModel/signUp_c
 import 'package:rent_car/Features/home/presentation/viewModel/addCar/add_car_cubit.dart';
 import 'package:rent_car/Features/home/presentation/viewModel/app_bar/app_bar_cubit.dart';
 import 'package:rent_car/Features/home/presentation/viewModel/cars_bloc/get_cars_bloc.dart';
+import 'package:rent_car/Features/home/presentation/viewModel/offers_bloc/offers_cubit.dart';
+import 'package:rent_car/Features/home/presentation/viewModel/searchCars/search_cars_bloc.dart';
 import 'package:sizer/sizer.dart';
 import '../../Features/authentication/presentation/pages/splash_screen.dart';
 import '../../Features/authentication/presentation/viewModel/appBloc/app_bloc.dart';
-import '../../Features/home/presentation/viewModel/car_description/car_description_cubit.dart';
 import '../../Features/home/presentation/viewModel/getUserData/get_user_data_cubit.dart';
 import '../../main.dart';
+import '../../models/repository/OffersRepository.dart';
 import '../../models/repository/image_picker.dart';
 import '../../models/repository/repository_auth.dart';
 import '../../models/repository/repository_fireStore.dart';
@@ -40,16 +42,13 @@ class BasicApp extends StatelessWidget {
           ),),
           BlocProvider<AppBarCubit>(create: (context)=>AppBarCubit()),
           BlocProvider<AddCarCubit>(create: (context)=>AddCarCubit(
-    repositoryImagePicker: getIt<RepositoryImagePicker>()
-    ,fireStoreRepositoryImplementation: getIt<FireStoreRepositoryImplementation>())),
-          BlocProvider<GetUserDataCubit>(create: (_) => GetUserDataCubit(
-              authenticationRepositoryImplementation: getIt<AuthenticationRepositoryImplementation>(),
-          )..setState(),),
-          BlocProvider<CarDescriptionCubit>(create: (_) => CarDescriptionCubit(
-            fireStoreRepositoryImplementation: getIt<FireStoreRepositoryImplementation>()),
-          ),
+    repositoryImagePicker: getIt<RepositoryImagePicker>())),
+          BlocProvider<UserCubit>(create: (_) => UserCubit(),),
           BlocProvider<GetCarsBloc>(create: (_) => GetCarsBloc()..add(GetFirstCarsEvent()),
           ),
+          BlocProvider<SearchCarsBloc>(create: (_) => SearchCarsBloc(),
+          ),
+          BlocProvider<OffersCubit>(create: (_) => OffersCubit(OffersRepository())),
         ],
         child: const BlocListen()
       ),
@@ -64,7 +63,7 @@ class BlocListen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AppBloc,AppState>(
-  listener: (context, state) {
+  listener: (context, state) async{
       if(context.read<AppBloc>().state.status == AppStatus.firstUnauthenticated){
         _navigatorKey.currentState
             ?.pushNamedAndRemoveUntil(Routes.onBoarding, (r) => false);
@@ -72,6 +71,7 @@ class BlocListen extends StatelessWidget {
         _navigatorKey.currentState
             ?.pushNamedAndRemoveUntil(Routes.login, (r) => false);
       }else if(context.read<AppBloc>().state.status == AppStatus.authenticated){
+        await context.read<UserCubit>().loadUserFromFireStore();
         _navigatorKey.currentState
             ?.pushNamedAndRemoveUntil(Routes.home, (r) => false);
       }else if(context.read<AppBloc>().state.status == AppStatus.authenticatedUnVerifiedEmail){

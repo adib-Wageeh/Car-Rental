@@ -8,9 +8,11 @@ enum ContentLineType {
 
 class ContentPlaceholder extends StatelessWidget {
   final ContentLineType lineType;
+  final bool isImage;
 
   const ContentPlaceholder({
     Key? key,
+    required this.isImage,
     required this.lineType,
   }) : super(key: key);
 
@@ -22,6 +24,7 @@ class ContentPlaceholder extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          (isImage)?
           Container(
             width: 110.sp,
             height: 110.sp,
@@ -36,7 +39,8 @@ class ContentPlaceholder extends StatelessWidget {
                 )
               ]
             ),
-          ),
+          ):const SizedBox()
+          ,
           const SizedBox(width: 12.0),
           Expanded(
             child: Column(

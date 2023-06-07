@@ -5,7 +5,7 @@ import 'package:rent_car/Features/home/presentation/pages/widgets/ItemDetailsPag
 import 'package:rent_car/Features/home/presentation/pages/widgets/ItemDetailsPage/FullScreenImagePage.dart';
 import 'package:rent_car/Features/home/presentation/pages/widgets/ItemDetailsPage/ItemDetailsWidget.dart';
 import 'package:rent_car/Features/home/presentation/pages/widgets/ItemDetailsPage/SellerDescriptionWidget.dart';
-import 'package:rent_car/Features/home/presentation/pages/widgets/ItemDetailsPage/SplitterWidget.dart';
+import 'package:rent_car/Features/home/presentation/pages/widgets/SplitterWidget.dart';
 import 'package:rent_car/application/core/assets.dart';
 import 'package:rent_car/models/entities/car_entity.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -75,14 +75,13 @@ class _ListItemDetailsScreenState extends State<ListItemDetailsScreen> {
                 const SplitterWidget(),
                 ItemDetailsWidget(title: "Price",text: "${widget.carEntity.pricePerDay!}\$/day",icon: FontAwesomeIcons.coins,)
                 ,const SplitterWidget(),
-                SellerDescriptionWidget(userEntity: widget.carEntity.userEntity)
+                SellerDescriptionWidget(userEntity: widget.carEntity.userEntity!,carEntity: widget.carEntity),
               ],
             ),
           )),
       );
   }
 }
-
 
 
 

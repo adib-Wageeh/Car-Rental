@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rent_car/models/entities/user_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../models/repository/repository_auth.dart';
@@ -40,6 +41,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     }
     }else{
       if(event.user!.emailVerified) {
+
         emit(const AppState.authenticated());
       }else{
         emit(const AppState.authenticatedUnVerifiedEmail());

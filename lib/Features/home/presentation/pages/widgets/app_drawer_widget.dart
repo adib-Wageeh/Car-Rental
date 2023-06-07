@@ -1,8 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rent_car/Features/home/presentation/viewModel/getUserData/get_user_data_cubit.dart';
 import 'package:rent_car/application/core/assets.dart';
+import 'package:rent_car/models/entities/user_entity.dart';
 
 class Menu {
   final IconData iconData;
@@ -18,7 +20,7 @@ class SliderView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GetUserDataCubit, GetUserDataState>(
+    return BlocBuilder<UserCubit, UserEntity>(
   builder: (context, state) {
     return Container(
       color: Colors.white,
@@ -29,22 +31,21 @@ class SliderView extends StatelessWidget {
           const SizedBox(
             height: 30,
           ),
-          CachedNetworkImage(
-            width: 170,
-            height: 170,
-            placeholder: (context, url) => const CircularProgressIndicator(),
-            imageUrl: state.imagePath,
-            imageBuilder: (context, imageProvider) { // you can access to imageProvider
-              return CircleAvatar( // or any widget that use imageProvider like (PhotoView)
-                backgroundImage: imageProvider,
-              );
-            },
+          CircleAvatar(
+            radius: 60,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(64),
+              child: Image.memory(
+                File(state.photo!).readAsBytesSync(),
+                key: UniqueKey(),
+              ),
+            ),
           ),
           const SizedBox(
             height: 20,
           ),
           Text(
-            state.name,
+            state.name!,
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.black,

@@ -2,28 +2,24 @@ import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:meta/meta.dart';
 import 'package:rent_car/models/repository/repository_fireStore.dart';
-
-import '../getUserData/get_user_data_cubit.dart';
 
 part 'edit_profile_state.dart';
 
 
 class EditProfileCubit extends Cubit<EditProfileState> {
   EditProfileCubit({
-  required this.getUserDataCubit
-  ,required this.fireStoreRepositoryImplementation}) : super(EditProfileInitial());
+  required this.fireStoreRepositoryImplementation}) : super(EditProfileInitial());
 
-  GetUserDataCubit getUserDataCubit;
   Uint8List? image;
   String? imagePath;
   TextEditingController nameEditingController = TextEditingController();
   final FireStoreRepositoryImplementation fireStoreRepositoryImplementation;
 
-  Future<void> saveData()async {
+  Future<int> saveData()async {
     if (nameEditingController.text.isEmpty && image == null) {
       emit(EditProfileError());
+      return 0;
     } else{
       emit(EditProfileLoading());
       if(nameEditingController.text.isNotEmpty && image == null) {
@@ -37,6 +33,7 @@ class EditProfileCubit extends Cubit<EditProfileState> {
         imagePath = await fireStoreRepositoryImplementation.saveImageChanges(image!);
       }
       emit(EditProfileDone());
+      return 1;
     }
   }
 

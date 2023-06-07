@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 class UserEntity extends Equatable{
@@ -7,32 +8,34 @@ class UserEntity extends Equatable{
   required this.email,
   required this.name,
    required this.photo,
-    required this.cars
   });
 
   final String email;
   final String id;
   final String? name;
   final String? photo;
-  final List<String>? cars;
-  static const empty = UserEntity(id: '',email: "",name: "",photo: "",cars: []);
+  static const empty = UserEntity(id: '',email: "",name: "",photo: "");
   bool get isEmpty => this == UserEntity.empty;
   bool get isNotEmpty => this != UserEntity.empty;
 
   @override
-  List<Object?> get props => [cars,email, id, name, photo];
+  List<Object?> get props => [email, id, name, photo];
 
   Map<String,dynamic> toJson(){
     return {
       "name":name,
-      "cars":cars,
       "email":email,
       "photo":photo,
     };
   }
 
   factory UserEntity.fromJson(Map<String,dynamic> json,String uuid){
-    return UserEntity(cars: json["cars"],id: uuid, email: json["email"], name: json["name"], photo: json["image"]);
+    return UserEntity(id: uuid, email: json["email"], name: json["name"], photo: json["image"]);
+  }
+
+  factory UserEntity.fromFireStore(DocumentSnapshot snapshot){
+    final data = snapshot.data() as Map<String,dynamic>;
+    return UserEntity(id: snapshot.id, email: data["email"], name: data["name"], photo: data["image"]);
   }
 
   UserEntity copyWith({
@@ -40,10 +43,8 @@ class UserEntity extends Equatable{
      String? id,
      String? name,
      String? photo,
-     List<String>? cars
   }) {
     return UserEntity(
-      cars: cars??this.cars,
       name: name??this.name,
       photo: photo??this.photo,
       email: email?? this.email,

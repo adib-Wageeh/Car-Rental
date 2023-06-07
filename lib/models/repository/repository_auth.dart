@@ -39,10 +39,10 @@ class AuthenticationRepositoryImplementation{
       if(firebaseUser==null){
         return firebaseUser;
       }
-      if(isSignUp == false) {
-        user = await firebaseUser.toUser;
-        cache.write<UserEntity>(key: userCacheKey, value: user);
-      }
+      // if(isSignUp == false) {
+      //   user = await firebaseUser.toUser;
+      //   cache.write<UserEntity>(key: userCacheKey, value: user);
+      // }
 
       return firebaseUser;
     });
@@ -73,7 +73,7 @@ class AuthenticationRepositoryImplementation{
          final imagePathCloud = await getIt<FireStoreRepositoryImplementation>().addNewUserData(
         _firebaseAuth.currentUser!.uid,
         name, email, imagePath);
-         UserEntity userEntity = UserEntity(cars: [],id: _firebaseAuth.currentUser!.uid, email: email, name: name, photo: imagePathCloud);
+         UserEntity userEntity = UserEntity(id: _firebaseAuth.currentUser!.uid, email: email, name: name, photo: imagePathCloud);
          cache.write(key: userCacheKey, value: userEntity);
         }
       });

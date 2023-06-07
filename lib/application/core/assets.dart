@@ -14,6 +14,7 @@ class Assets{
 
   static Color appPrimaryWhiteColor = const Color(0xff0cac86);
   static Color registerButtonWhiteColor = const Color(0xffe8faf4);
+  static Color searchBarColor = const Color(0xffDADADA);
 
 
 }
